@@ -124,6 +124,13 @@ public class Graph {
             throw new IllegalArgumentException("Edge does not exist");
         }
     }
+    public Path GraphSearch(String src, String dst, Algorithm algo) {
+        if (algo == Algorithm.BFS) {
+            return bfsSearch(src, dst);
+        } else {
+            return dfsSearch(src, dst);
+        }
+    }
     public Path GraphSearch(String src, String dst) {
         if (!adjacencyList.containsKey(src) || !adjacencyList.containsKey(dst)) {
             return null;
@@ -191,5 +198,9 @@ public class Graph {
 
         path.remove(path.size() - 1); // Backtrack
         return false;
+    }
+    public enum Algorithm{
+        BFS;
+        DFS;
     }
 }
