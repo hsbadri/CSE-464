@@ -155,4 +155,41 @@ public class Graph {
         }
         return null; // No path found
     }
+    public Path GraphSearch(String src, String dst) {
+        if (!adjacencyList.containsKey(src) || !adjacencyList.containsKey(dst)) {
+            return null;
+        }
+
+        Set<String> visited = new HashSet<>();
+        List<String> path = new ArrayList<>();
+        boolean found = dfsHelper(src, dst, visited, path);
+        
+        if (found) {
+            Path resultPath = new Path();
+            path.forEach(resultPath::addNode);
+            return resultPath;
+        } else {
+            return null;
+        }
+    }
+
+    private boolean dfsHelper(String current, String dst, Set<String> visited, List<String> path) {
+        visited.add(current);
+        path.add(current);
+
+        if (current.equals(dst)) {
+            return true;
+        }
+
+        for (String neighbor : adjacencyList.getOrDefault(current, new ArrayList<>())) {
+            if (!visited.contains(neighbor)) {
+                if (dfsHelper(neighbor, dst, visited, path)) {
+                    return true;
+                }
+            }
+        }
+
+        path.remove(path.size() - 1); // Backtrack
+        return false;
+    }
 }
