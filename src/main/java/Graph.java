@@ -86,17 +86,7 @@ public class Graph {
         writer.close();
     }
 
-    // Output the graph to a PNG file (requires Graphviz installed)
-    public void outputGraphics(String path, String format) throws IOException {
-        String dotFile = path + ".dot";
-        outputDOTGraph(dotFile);
-        Process process = new ProcessBuilder("dot", "-T" + format, dotFile, "-o", path + "." + format).start();
-        try {
-            process.waitFor(); // Ensure the process finishes before continuing
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
+    // Remove a single node and all associated edges
     public void removeNode(String label) {
         if (adjacencyList.containsKey(label)) {
             adjacencyList.remove(label);
@@ -124,14 +114,25 @@ public class Graph {
             throw new IllegalArgumentException("Edge does not exist");
         }
     }
+
+    // Enum to specify the search algorithm
+    public enum Algorithm {
+        BFS, DFS;
+    }
+
+    // GraphSearch method with Algorithm selection
     public Path GraphSearch(String src, String dst, Algorithm algo) {
         if (algo == Algorithm.BFS) {
             return bfsSearch(src, dst);
-        } else {
+        } else if (algo == Algorithm.DFS) {
             return dfsSearch(src, dst);
+        } else {
+            return null;
         }
     }
-    public Path GraphSearch(String src, String dst) {
+
+    // BFS implementation
+    private Path bfsSearch(String src, String dst) {
         if (!adjacencyList.containsKey(src) || !adjacencyList.containsKey(dst)) {
             return null;
         }
@@ -160,9 +161,11 @@ public class Graph {
                 }
             }
         }
-        return null; // No path found
+        return null;
     }
-    public Path GraphSearch(String src, String dst) {
+
+    // DFS implementation
+    private Path dfsSearch(String src, String dst) {
         if (!adjacencyList.containsKey(src) || !adjacencyList.containsKey(dst)) {
             return null;
         }
@@ -170,7 +173,7 @@ public class Graph {
         Set<String> visited = new HashSet<>();
         List<String> path = new ArrayList<>();
         boolean found = dfsHelper(src, dst, visited, path);
-        
+
         if (found) {
             Path resultPath = new Path();
             path.forEach(resultPath::addNode);
@@ -180,6 +183,7 @@ public class Graph {
         }
     }
 
+    // Helper method for DFS
     private boolean dfsHelper(String current, String dst, Set<String> visited, List<String> path) {
         visited.add(current);
         path.add(current);
@@ -198,9 +202,5 @@ public class Graph {
 
         path.remove(path.size() - 1); // Backtrack
         return false;
-    }
-    public enum Algorithm{
-        BFS;
-        DFS;
     }
 }

@@ -37,6 +37,8 @@ public class GraphTest {
         File file = new File("outputGraph.dot");
         assertTrue(file.exists());
     }
+
+    @Test
     public void testRemoveNode() {
         Graph graph = new Graph();
         graph.addNode("A");
@@ -84,4 +86,76 @@ public class GraphTest {
             graph.removeEdge("A", "NonExistent");
         });
     }
+
+    // New tests for GraphSearch API with BFS and DFS
+
+    public void testGraphSearchBFS() {
+        Graph graph = new Graph();
+        graph.addNode("A");
+        graph.addNode("B");
+        graph.addNode("C");
+        graph.addEdge("A", "B");
+        graph.addEdge("B", "C");
+
+        Path path = graph.GraphSearch("A", "C", Graph.Algorithm.BFS);
+        assertNotNull(path);
+        assertEquals("A -> B -> C", path.toString());
+    }
+
+    @Test
+    public void testGraphSearchDFS() {
+        Graph graph = new Graph();
+        graph.addNode("A");
+        graph.addNode("B");
+        graph.addNode("C");
+        graph.addEdge("A", "B");
+        graph.addEdge("B", "C");
+
+        Path path = graph.GraphSearch("A", "C", Graph.Algorithm.DFS);
+        assertNotNull(path);
+        assertEquals("A -> B -> C", path.toString());
+    }
+
+    @Test
+    public void testGraphSearchNoPath() {
+        Graph graph = new Graph();
+        graph.addNode("A");
+        graph.addNode("B");
+
+        Path pathBFS = graph.GraphSearch("A", "B", Graph.Algorithm.BFS);
+        Path pathDFS = graph.GraphSearch("A", "B", Graph.Algorithm.DFS);
+        assertNull(pathBFS);
+        assertNull(pathDFS);
+    }
+
+    @Test
+    public void testGraphSearchCycleBFS() {
+        Graph graph = new Graph();
+        graph.addNode("A");
+        graph.addNode("B");
+        graph.addNode("C");
+        graph.addEdge("A", "B");
+        graph.addEdge("B", "C");
+        graph.addEdge("C", "A"); // Creates a cycle
+
+        Path path = graph.GraphSearch("A", "C", Graph.Algorithm.BFS);
+        assertNotNull(path);
+        assertEquals("A -> B -> C", path.toString());
+    }
+
+    @Test
+    public void testGraphSearchCycleDFS() {
+        Graph graph = new Graph();
+        graph.addNode("A");
+        graph.addNode("B");
+        graph.addNode("C");
+        graph.addEdge("A", "B");
+        graph.addEdge("B", "C");
+        graph.addEdge("C", "A"); // Creates a cycle
+
+        Path path = graph.GraphSearch("A", "C", Graph.Algorithm.DFS);
+        assertNotNull(path);
+        assertEquals("A -> B -> C", path.toString());
+    }
+
 }
