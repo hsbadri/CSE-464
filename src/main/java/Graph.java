@@ -203,4 +203,15 @@ public class Graph {
         path.remove(path.size() - 1); // Backtrack
         return false;
     }
+    public void outputGraphics(String path, String format) throws IOException {
+        String dotFile = path + ".dot";
+        outputDOTGraph(dotFile);
+        Process process = new ProcessBuilder("dot", "-T" + format, dotFile, "-o", path + "." + format).start();
+        try {
+            process.waitFor(); // Ensure the process finishes before continuing
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+    
 }
