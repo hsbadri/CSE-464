@@ -97,4 +97,31 @@ public class Graph {
             e.printStackTrace();
         }
     }
+    public void removeNode(String label) {
+        if (adjacencyList.containsKey(label)) {
+            adjacencyList.remove(label);
+            for (List<String> edges : adjacencyList.values()) {
+                edges.remove(label);
+            }
+        } else {
+            throw new IllegalArgumentException("Node does not exist");
+        }
+    }
+
+    // Remove multiple nodes
+    public void removeNodes(String[] labels) {
+        for (String label : labels) {
+            removeNode(label);
+        }
+    }
+
+    // Remove a specific edge
+    public void removeEdge(String srcLabel, String dstLabel) {
+        List<String> edges = adjacencyList.get(srcLabel);
+        if (edges != null && edges.contains(dstLabel)) {
+            edges.remove(dstLabel);
+        } else {
+            throw new IllegalArgumentException("Edge does not exist");
+        }
+    }
 }

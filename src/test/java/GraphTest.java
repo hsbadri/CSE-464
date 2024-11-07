@@ -37,4 +37,51 @@ public class GraphTest {
         File file = new File("outputGraph.dot");
         assertTrue(file.exists());
     }
+    public void testRemoveNode() {
+        Graph graph = new Graph();
+        graph.addNode("A");
+        graph.addNode("B");
+        graph.addEdge("A", "B");
+        graph.removeNode("A");
+        assertFalse(graph.getNodes().contains("A"));
+        assertFalse(graph.getEdges("A").contains("B"));
+    }
+
+    @Test
+    public void testRemoveNodes() {
+        Graph graph = new Graph();
+        graph.addNodes(new String[]{"A", "B", "C"});
+        graph.addEdge("A", "B");
+        graph.addEdge("B", "C");
+        graph.removeNodes(new String[]{"A", "B"});
+        assertFalse(graph.getNodes().contains("A"));
+        assertFalse(graph.getNodes().contains("B"));
+        assertTrue(graph.getNodes().contains("C"));
+    }
+
+    @Test
+    public void testRemoveEdge() {
+        Graph graph = new Graph();
+        graph.addEdge("A", "B");
+        graph.removeEdge("A", "B");
+        assertFalse(graph.getEdges("A").contains("B"));
+    }
+
+    @Test
+    public void testRemoveNonExistentNode() {
+        Graph graph = new Graph();
+        assertThrows(IllegalArgumentException.class, () -> {
+            graph.removeNode("NonExistent");
+        });
+    }
+
+    @Test
+    public void testRemoveNonExistentEdge() {
+        Graph graph = new Graph();
+        graph.addNode("A");
+        graph.addNode("B");
+        assertThrows(IllegalArgumentException.class, () -> {
+            graph.removeEdge("A", "NonExistent");
+        });
+    }
 }
