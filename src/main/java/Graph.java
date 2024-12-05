@@ -2,7 +2,7 @@ import java.io.*;
 import java.util.*;
 
 public class Graph {
-    private Map<String, List<String>> adjacencyList;
+    private Map<Node, List<Node>> adjacencyList;
 
     public Graph() {
         adjacencyList = new HashMap<>();
@@ -15,11 +15,11 @@ public class Graph {
         while ((line = reader.readLine()) != null) {
             if (line.contains("->")) {
                 String[] nodes = line.split("->");
-                String src = nodes[0].trim();
-                String dest = nodes[1].replace(";", "").trim();
+                Node src = new Node(nodes[0].trim());
+                Node dest = new Node(nodes[1].replace(";", "").trim());
                 addEdge(src, dest);
             } else if (line.contains("[label=")) {
-                String node = line.split("\\[")[0].trim();
+                Node node = new Node(line.split("\\[")[0].trim());
                 addNode(node);
             }
         }
@@ -27,35 +27,33 @@ public class Graph {
     }
 
     // Add a node to the graph
-    public void addNode(String label) {
-        if (!adjacencyList.containsKey(label)) {
-            adjacencyList.put(label, new ArrayList<>());
-        }
+    public void addNode(Node node) {
+        adjacencyList.putIfAbsent(node, new ArrayList<>());
     }
 
     // Add multiple nodes at once
-    public void addNodes(String[] labels) {
-        for (String label : labels) {
-            addNode(label);
+    public void addNodes(Node[] nodes) {
+        for (Node node : nodes) {
+            addNode(node);
         }
     }
 
     // Add an edge between two nodes
-    public void addEdge(String srcLabel, String dstLabel) {
-        addNode(srcLabel); // Ensure the source node exists
-        addNode(dstLabel); // Ensure the destination node exists
-        if (!adjacencyList.get(srcLabel).contains(dstLabel)) {
-            adjacencyList.get(srcLabel).add(dstLabel);
+    public void addEdge(Node src, Node dest) {
+        addNode(src); // Ensure the source node exists
+        addNode(dest); // Ensure the destination node exists
+        if (!adjacencyList.get(src).contains(dest)) {
+            adjacencyList.get(src).add(dest);
         }
     }
 
     // Get all nodes
-    public Set<String> getNodes() {
+    public Set<Node> getNodes() {
         return adjacencyList.keySet();
     }
 
     // Get edges for a given node
-    public List<String> getEdges(String node) {
+    public List<Node> getEdges(Node node) {
         return adjacencyList.getOrDefault(node, new ArrayList<>());
     }
 
@@ -65,8 +63,8 @@ public class Graph {
         StringBuilder sb = new StringBuilder();
         sb.append("Nodes: ").append(adjacencyList.keySet()).append("\n");
         sb.append("Edges:\n");
-        for (Map.Entry<String, List<String>> entry : adjacencyList.entrySet()) {
-            for (String dest : entry.getValue()) {
+        for (Map.Entry<Node, List<Node>> entry : adjacencyList.entrySet()) {
+            for (Node dest : entry.getValue()) {
                 sb.append(entry.getKey()).append(" -> ").append(dest).append("\n");
             }
         }
@@ -77,9 +75,9 @@ public class Graph {
     public void outputDOTGraph(String filepath) throws IOException {
         BufferedWriter writer = new BufferedWriter(new FileWriter(filepath));
         writer.write("digraph G {\n");
-        for (Map.Entry<String, List<String>> entry : adjacencyList.entrySet()) {
-            for (String dest : entry.getValue()) {
-                writer.write(entry.getKey() + " -> " + dest + ";\n");
+        for (Map.Entry<Node, List<Node>> entry : adjacencyList.entrySet()) {
+            for (Node dest : entry.getValue()) {
+                writer.write(entry.getKey().getLabel() + " -> " + dest.getLabel() + ";\n");
             }
         }
         writer.write("}");
@@ -87,11 +85,11 @@ public class Graph {
     }
 
     // Remove a single node and all associated edges
-    public void removeNode(String label) {
-        if (adjacencyList.containsKey(label)) {
-            adjacencyList.remove(label);
-            for (List<String> edges : adjacencyList.values()) {
-                edges.remove(label);
+    public void removeNode(Node node) {
+        if (adjacencyList.containsKey(node)) {
+            adjacencyList.remove(node);
+            for (List<Node> edges : adjacencyList.values()) {
+                edges.remove(node);
             }
         } else {
             throw new IllegalArgumentException("Node does not exist");
@@ -99,17 +97,17 @@ public class Graph {
     }
 
     // Remove multiple nodes
-    public void removeNodes(String[] labels) {
-        for (String label : labels) {
-            removeNode(label);
+    public void removeNodes(Node[] nodes) {
+        for (Node node : nodes) {
+            removeNode(node);
         }
     }
 
     // Remove a specific edge
-    public void removeEdge(String srcLabel, String dstLabel) {
-        List<String> edges = adjacencyList.get(srcLabel);
-        if (edges != null && edges.contains(dstLabel)) {
-            edges.remove(dstLabel);
+    public void removeEdge(Node src, Node dest) {
+        List<Node> edges = adjacencyList.get(src);
+        if (edges != null && edges.contains(dest)) {
+            edges.remove(dest);
         } else {
             throw new IllegalArgumentException("Edge does not exist");
         }
@@ -121,41 +119,41 @@ public class Graph {
     }
 
     // GraphSearch method with Algorithm selection
-    public Path GraphSearch(String src, String dst, Algorithm algo) {
+    public Path GraphSearch(Node src, Node dest, Algorithm algo) {
         if (algo == Algorithm.BFS) {
-            return bfsSearch(src, dst);
+            return bfsSearch(src, dest);
         } else if (algo == Algorithm.DFS) {
-            return dfsSearch(src, dst);
+            return dfsSearch(src, dest);
         } else {
             return null;
         }
     }
 
     // BFS implementation
-    private Path bfsSearch(String src, String dst) {
-        if (!adjacencyList.containsKey(src) || !adjacencyList.containsKey(dst)) {
+    private Path bfsSearch(Node src, Node dest) {
+        if (!adjacencyList.containsKey(src) || !adjacencyList.containsKey(dest)) {
             return null;
         }
 
-        Queue<List<String>> queue = new LinkedList<>();
-        Set<String> visited = new HashSet<>();
+        Queue<List<Node>> queue = new LinkedList<>();
+        Set<Node> visited = new HashSet<>();
         queue.add(Collections.singletonList(src));
         visited.add(src);
 
         while (!queue.isEmpty()) {
-            List<String> path = queue.poll();
-            String lastNode = path.get(path.size() - 1);
+            List<Node> path = queue.poll();
+            Node lastNode = path.get(path.size() - 1);
 
-            if (lastNode.equals(dst)) {
+            if (lastNode.equals(dest)) {
                 Path resultPath = new Path();
-                path.forEach(resultPath::addNode);
+                path.forEach(node -> resultPath.addNode(node.getLabel()));
                 return resultPath;
             }
 
-            for (String neighbor : adjacencyList.getOrDefault(lastNode, new ArrayList<>())) {
+            for (Node neighbor : adjacencyList.getOrDefault(lastNode, new ArrayList<>())) {
                 if (!visited.contains(neighbor)) {
                     visited.add(neighbor);
-                    List<String> newPath = new ArrayList<>(path);
+                    List<Node> newPath = new ArrayList<>(path);
                     newPath.add(neighbor);
                     queue.add(newPath);
                 }
@@ -165,18 +163,18 @@ public class Graph {
     }
 
     // DFS implementation
-    private Path dfsSearch(String src, String dst) {
-        if (!adjacencyList.containsKey(src) || !adjacencyList.containsKey(dst)) {
+    private Path dfsSearch(Node src, Node dest) {
+        if (!adjacencyList.containsKey(src) || !adjacencyList.containsKey(dest)) {
             return null;
         }
 
-        Set<String> visited = new HashSet<>();
-        List<String> path = new ArrayList<>();
-        boolean found = dfsHelper(src, dst, visited, path);
+        Set<Node> visited = new HashSet<>();
+        List<Node> path = new ArrayList<>();
+        boolean found = dfsHelper(src, dest, visited, path);
 
         if (found) {
             Path resultPath = new Path();
-            path.forEach(resultPath::addNode);
+            path.forEach(node -> resultPath.addNode(node.getLabel()));
             return resultPath;
         } else {
             return null;
@@ -184,17 +182,17 @@ public class Graph {
     }
 
     // Helper method for DFS
-    private boolean dfsHelper(String current, String dst, Set<String> visited, List<String> path) {
+    private boolean dfsHelper(Node current, Node dest, Set<Node> visited, List<Node> path) {
         visited.add(current);
         path.add(current);
 
-        if (current.equals(dst)) {
+        if (current.equals(dest)) {
             return true;
         }
 
-        for (String neighbor : adjacencyList.getOrDefault(current, new ArrayList<>())) {
+        for (Node neighbor : adjacencyList.getOrDefault(current, new ArrayList<>())) {
             if (!visited.contains(neighbor)) {
-                if (dfsHelper(neighbor, dst, visited, path)) {
+                if (dfsHelper(neighbor, dest, visited, path)) {
                     return true;
                 }
             }
@@ -203,6 +201,7 @@ public class Graph {
         path.remove(path.size() - 1); // Backtrack
         return false;
     }
+
     public void outputGraphics(String path, String format) throws IOException {
         String dotFile = path + ".dot";
         outputDOTGraph(dotFile);
@@ -213,5 +212,4 @@ public class Graph {
             e.printStackTrace();
         }
     }
-    
 }
