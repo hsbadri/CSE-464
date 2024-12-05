@@ -13,14 +13,35 @@ public class Graph {
         BufferedReader reader = new BufferedReader(new FileReader(filepath));
         String line;
         while ((line = reader.readLine()) != null) {
+            line = line.trim();
+
+            // Skip empty lines
+            if (line.isEmpty()) {
+                continue;
+            }
+
+            // Handle edges
             if (line.contains("->")) {
                 String[] nodes = line.split("->");
+                if (nodes.length != 2) {
+                    throw new IllegalArgumentException("Malformed edge: " + line);
+                }
                 Node src = new Node(nodes[0].trim());
                 Node dest = new Node(nodes[1].replace(";", "").trim());
                 addEdge(src, dest);
+
+                // Handle labeled nodes
             } else if (line.contains("[label=")) {
-                Node node = new Node(line.split("\\[")[0].trim());
+                String[] parts = line.split("\\[");
+                if (parts.length < 1 || parts[0].trim().isEmpty()) {
+                    throw new IllegalArgumentException("Malformed node: " + line);
+                }
+                Node node = new Node(parts[0].trim());
                 addNode(node);
+
+                // Invalid input
+            } else {
+                throw new IllegalArgumentException("Unrecognized line format: " + line);
             }
         }
         reader.close();
@@ -29,13 +50,6 @@ public class Graph {
     // Add a node to the graph
     public void addNode(Node node) {
         adjacencyList.putIfAbsent(node, new ArrayList<>());
-    }
-
-    // Add multiple nodes at once
-    public void addNodes(Node[] nodes) {
-        for (Node node : nodes) {
-            addNode(node);
-        }
     }
 
     // Add an edge between two nodes
@@ -93,13 +107,6 @@ public class Graph {
             }
         } else {
             throw new IllegalArgumentException("Node does not exist");
-        }
-    }
-
-    // Remove multiple nodes
-    public void removeNodes(Node[] nodes) {
-        for (Node node : nodes) {
-            removeNode(node);
         }
     }
 
