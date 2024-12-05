@@ -1,6 +1,9 @@
 import java.io.*;
 import java.util.*;
 
+import main.java.BFSStrategy;
+import main.java.DFSStrategy;
+
 public class Graph {
     private Map<Node, List<Node>> adjacencyList;
 
@@ -127,13 +130,15 @@ public class Graph {
 
     // GraphSearch method with Algorithm selection
     public Path GraphSearch(Node src, Node dest, Algorithm algo) {
+        SearchStrategy strategy;
         if (algo == Algorithm.BFS) {
-            return bfsSearch(src, dest);
+            searchAlgorithm = new BFSStrategy();
         } else if (algo == Algorithm.DFS) {
-            return dfsSearch(src, dest);
+            searchAlgorithm = new DFSStrategy();
         } else {
             return null;
         }
+        return strategy.search(adjacencyList, src, dest);
     }
 
     // BFS implementation
